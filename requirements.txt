@@ -1,0 +1,6 @@
+# This project uses only Python standard library modules (tkinter, dataclasses, typing, etc.).
+
+# Note: On Linux you may need the system package that provides Tk support:
+# Debian/Ubuntu: sudo apt install python3-tk
+# Fedora: sudo dnf install python3-tkinter
+# Arch: sudo pacman -S tk
