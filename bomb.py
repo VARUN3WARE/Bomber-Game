@@ -268,6 +268,21 @@ class Game:
         if len(self.msgs) > 5:
             self.msgs.pop(0)
 
+    # ---- occupancy helper (NEW) ----
+    def is_occupied(self, x: int, y: int, ignore: Optional[Bomberman] = None) -> bool:
+        """Return True if any alive player/bot (except 'ignore') currently occupies (x,y)."""
+        for p in self.players:
+            if p is ignore:
+                continue
+            if p.alive and p.x == x and p.y == y:
+                return True
+        for b in self.bots:
+            if b is ignore:
+                continue
+            if b.alive and b.x == x and b.y == y:
+                return True
+        return False
+
     # ---- bombs ----
     def place_bomb(self, owner:Bomberman) -> bool:
         if not owner.can_place():
@@ -453,8 +468,9 @@ class Game:
     def follow_path_step(self, bot:Computer):
         if not bot.path:
             return
-        nx,ny = bot.path[0]
-        if self.map.is_walkable(nx,ny):
+        nx, ny = bot.path[0]
+        # ensure tile is walkable AND not occupied by someone else
+        if self.map.is_walkable(nx, ny) and not self.is_occupied(nx, ny, ignore=bot):
             bot.x, bot.y = nx, ny
             bot.path.pop(0)
         else:
@@ -465,7 +481,9 @@ class Game:
         random.shuffle(dirs)
         for dx,dy in dirs:
             nx,ny = bot.x + dx, bot.y + dy
-            if self.map.in_bounds(nx,ny) and self.map.is_walkable(nx,ny):
+            if (self.map.in_bounds(nx,ny)
+                and self.map.is_walkable(nx,ny)
+                and not self.is_occupied(nx,ny, ignore=bot)):
                 bot.x, bot.y = nx, ny
                 return
 
@@ -502,7 +520,9 @@ class Game:
             dx = 1
         if dx != 0 or dy != 0:
             nx,ny = p.x + dx, p.y + dy
-            if self.map.in_bounds(nx,ny) and self.map.is_walkable(nx,ny):
+            if (self.map.in_bounds(nx,ny)
+                and self.map.is_walkable(nx,ny)
+                and not self.is_occupied(nx,ny)):
                 p.x, p.y = nx, ny
 
     # ---- draw ----
@@ -577,3 +597,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
